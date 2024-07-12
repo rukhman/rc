@@ -9,13 +9,15 @@
   <body>
     <div class="container" id="container">
       <div class="interface">
+        <button class="save-button" id="save">Сохранить</button>
         <button class="add-button" id="addButton">Добавить кнопку</button>
-        <input type="file" id="photoInput" />
+        <input type="file" placeholder="введите url" id="photoInput" />
+        <select name="versions" id="versions"></select>
       </div>
       <div class="canvas" id="canvas">
-        <img id="preview" />
+        <img id="preview" alt="Изображение не загружено" />
       </div>
     </div>
-    <script type="text/javascript" src="./index.js"></script>
+    <script type="module" src="./index.js"></script>
   </body>
 </html>
