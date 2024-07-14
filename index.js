@@ -1,3 +1,5 @@
+import { exportToJson, importFromJson } from "./exportDB.js";
+
 const request = indexedDB.open("db", 1); // подключаемся к бд
 let i = 0;
 let time = 0;
@@ -16,11 +18,16 @@ request.onsuccess = (event) => {
 
   const getRequest = store.getAll();
   getRequest.onsuccess = (e) => {
+    console.log("onsuccess");
     const images = getRequest.result;
+    const select = document.getElementById("versions");
+    select.options[select.options.length] = new Option("Не выбрано", -1);
+
     images.forEach((item) => {
-      const select = document.getElementById("versions");
       select.options[select.options.length] = new Option(item.name, item.id);
     });
+    select.value = localStorage.getItem("version") ?? -1;
+    onVersionChange();
   };
   getRequest.onerror = (e) => console.log(e.target.error.message);
 };
@@ -30,7 +37,16 @@ request.onerror = function () {
 };
 
 document.getElementById("save").onclick = async () => {
-  const name = prompt("Введите название сохраняемой версии", "Версия №");
+  const select = document.getElementById("versions");
+  let existingName = "Версия №";
+
+  if (+select.value !== -1) {
+    existingName = Array.from(select.options).filter(
+      (option) => option.selected
+    )[0].text;
+  }
+
+  const name = prompt("Введите название сохраняемой версии", existingName);
   if (!name) return;
   onSave(name);
 };
@@ -162,7 +178,38 @@ document.getElementById("addButton").addEventListener("click", () => {
   addButton(++i);
 });
 
-document.getElementById("versions").addEventListener("change", (event) => {
+document.getElementById("reset").addEventListener("click", (event) => {
+  if (confirm("Очистить базу данных?")) {
+    indexedDB.deleteDatabase("db");
+    localStorage.clear();
+    location.reload();
+  }
+});
+
+document.getElementById("deleteButton").addEventListener("click", (event) => {
+  if (confirm("Удалить текущую версию?")) {
+    const db = request.result; // получаем бд
+    const transaction = db.transaction(["images"], "readwrite"); // создаем транзакцию
+    const imagesStore = transaction.objectStore("images"); // получаем хранилище images
+    const versionNode = document.getElementById("versions");
+    const version = +versionNode.value;
+    if (version === -1) {
+      alert("так делать нельзя, выбери другую версию");
+    } else {
+      imagesStore.delete(+version);
+      clearWindow();
+      versionNode.options[versionNode.selectedIndex].remove();
+      localStorage.setItem("version", -1);
+    }
+  }
+});
+
+//выбор селекта
+document.getElementById("versions").addEventListener("change", (_event) => {
+  onVersionChange();
+});
+
+function onVersionChange() {
   const db = request.result; // получаем бд
   const transaction = db.transaction(["images"], "readwrite");
   const store = transaction.objectStore("images"); // получаем хранилище users
@@ -170,26 +217,72 @@ document.getElementById("versions").addEventListener("change", (event) => {
   const getRequest = store.getAll();
   getRequest.onsuccess = (e) => {
     const images = getRequest.result;
-    let selectedId = +Array.from(event.target.options)
+    let selectedId = +Array.from(document.getElementById("versions").options)
       .filter((option) => option.selected)
       .map((option) => option.value)?.[0];
     const selectedVersion = images.find((i) => i.id === selectedId);
+    clearWindow();
+    localStorage.setItem("version", selectedId);
+
     if (selectedVersion) {
-      if (selectedVersion.img) {
-        imageData = selectedVersion.img;
-        document.getElementById("preview").src = selectedVersion.img;
-      }
+      document.getElementById("preview").src = selectedVersion?.img || "";
       (selectedVersion.buttons || []).forEach((b) => {
         addButton(b.id, b.name, b.offsetLeft, b.offsetTop, b.isOn);
       });
     }
-
-    images.forEach((item) => {
-      const select = document.getElementById("versions");
-      select.options[select.options.length] = new Option(item.name, item.id);
-    });
   };
   getRequest.onerror = (e) => console.log(e.target.error.message);
+}
+
+function clearWindow() {
+  const deleteElement = document.getElementsByClassName("butWrap");
+  document.getElementById("preview").src = "";
+  for (let i = 0; i < deleteElement.length; i++) {
+    deleteElement[i].remove();
+  }
+}
+
+document.getElementById("export").onclick = async () => {
+  const filename = prompt("Введите имя файла");
+  if (filename) {
+    exportToJson(request.result)
+      .then((result) => {
+        const blob = new Blob([result], { type: "text/csv" });
+        if (window.navigator.msSaveOrOpenBlob) {
+          console.log("Exported JSON string:", result);
+          window.navigator.msSaveBlob(blob, filename);
+        } else {
+          const elem = window.document.createElement("a");
+          elem.href = window.URL.createObjectURL(blob);
+          elem.download = filename;
+          document.body.appendChild(elem);
+          elem.click();
+          document.body.removeChild(elem);
+        }
+      })
+      .catch((error) => {
+        console.error("Something went wrong during export:", error);
+      });
+  }
+};
+
+document.getElementById("import").addEventListener("change", () => {
+  const fr = new FileReader();
+  fr.readAsText(document.getElementById("import").files[0]);
+  fr.addEventListener("load", function () {
+    const data = fr.result;
+    console.log(data);
+    importFromJson(request.result, data)
+      .then((result) => {
+        console.log("Exported JSON string:", result);
+        setTimeout(() => {
+          location.reload();
+        }, 500);
+      })
+      .catch((error) => {
+        console.error("Something went wrong during export:", error);
+      });
+  });
 });
 
 function onSave(name) {
@@ -209,16 +302,30 @@ function onSave(name) {
       isOn: btnWrap.querySelector("input").getAttribute("on"),
     });
   }
-  console.log(name, buttons, imageData);
   const image = {
     name,
     img: imageData,
     buttons,
   };
-  const addRequest = imagesStore.add(image); // добавляем объект image в хранилище imagesStore
-  addRequest.onsuccess = (_) => {
-    console.log("id добавленной записи:", addRequest.result); // id добавленной записи: 1
-  };
+  const select = document.getElementById("versions");
+  const selectedId = +select.value;
+  if (selectedId === -1) {
+    const addRequest = imagesStore.add(image); // добавляем объект image в хранилище imagesStore
+    addRequest.onsuccess = (_) => {
+      const id = +addRequest.result;
+      select.options[select.options.length] = new Option(name, id);
+      select.value = id;
+      alert(`Создана новая запись с именем "${name}" и ID ${id}`);
+    };
+  } else {
+    const request = imagesStore.get(selectedId);
+    request.onsuccess = (e) => {
+      if (request.result) {
+        const data = { ...request.result, ...image };
+        imagesStore.put(data);
+      }
+    };
+  }
 }
 
 function naumCode(selectedButton, on) {

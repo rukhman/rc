@@ -4,6 +4,10 @@ body {
     padding: 0;
 }
 
+button {
+    border: none;
+}
+
 body {
     display: flex;
     align-items: center;
@@ -32,4 +36,26 @@ body {
 
 .red {
     background-color: red;
+}
+
+.btn {
+    margin-bottom: 5px;
+    background-color: rgb(163, 157, 157);
+    border-radius: 8px;
+    padding: 4px 10px;
+    cursor: pointer;
+    color: white;
+    transition: transform 300ms ease-out;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+}
+
+.input {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid #222;
+    margin-bottom: 5px;
 }

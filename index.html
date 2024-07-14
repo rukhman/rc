@@ -9,15 +9,39 @@
   <body>
     <div class="container" id="container">
       <div class="interface">
-        <button class="save-button" id="save">Сохранить</button>
-        <button class="add-button" id="addButton">Добавить кнопку</button>
-        <input type="file" placeholder="введите url" id="photoInput" />
-        <select name="versions" id="versions"></select>
+        <button class="btn save-button" id="save">Сохранить</button>
+        <button class="btn add-button" id="addButton">Добавить кнопку</button>
+        <span class="input photoInput-button">
+          <label for="photoInput">Загрузить изображение</label>
+          <input type="file" id="photoInput" />
+        </span>
+        <span class="input versions-button">
+          <label for="versions">Версии</label>
+          <select name="versions" id="versions"></select>
+          <button class="btn delete-button" id="deleteButton">
+            Удалить текущую версию
+          </button>
+        </span>
+
+        <div>
+          <button class="btn reset-button" id="reset">
+            Очистить базу данных
+          </button>
+          <button class="btn export-button" id="export">
+            Экспортировать базу данных
+          </button>
+
+          <span class="input import-button">
+            <label for="import">Импортировать базу данных</label>
+            <input type="file" id="import" />
+          </span>
+        </div>
       </div>
       <div class="canvas" id="canvas">
         <img id="preview" alt="Изображение не загружено" />
       </div>
     </div>
+    <script type="module" src="./exportDB.js"></script>
     <script type="module" src="./index.js"></script>
   </body>
 </html>
