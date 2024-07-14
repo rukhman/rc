@@ -1,4 +1,4 @@
-import { exportToJson, importFromJson } from "./exportDB.js";
+// import { exportToJson, importFromJson } from "./exportDB.js";
 
 const request = indexedDB.open("db", 1); // подключаемся к бд
 let i = 0;
@@ -80,6 +80,7 @@ function addButton(inx, name, offsetLeft, offsetTop, isOn = false) {
   edit.style.background = "black";
   edit.style.borderRadius = "50%";
   edit.style.cursor = "pointer";
+  edit.title = "Изменить";
   edit.classList.add("editButton");
 
   const del = document.createElement("div");
@@ -91,6 +92,7 @@ function addButton(inx, name, offsetLeft, offsetTop, isOn = false) {
   del.style.background = "red";
   del.style.borderRadius = "50%";
   del.style.cursor = "pointer";
+  del.title = "Удалить";
   del.classList.add("delButton");
 
   const butWrap = document.createElement("div");
