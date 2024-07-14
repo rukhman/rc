@@ -239,8 +239,8 @@ function onVersionChange() {
 function clearWindow() {
   const deleteElement = document.getElementsByClassName("butWrap");
   document.getElementById("preview").src = "";
-  for (let i = 0; i < deleteElement.length; i++) {
-    deleteElement[i].remove();
+  while (deleteElement.length > 0) {
+    deleteElement[deleteElement.length - 1].remove();
   }
 }
 
@@ -345,3 +345,5 @@ function naumCode(selectedButton, on) {
 
   //>>>>>>>>>>>>>>>>>>
 }
+
+//конец!

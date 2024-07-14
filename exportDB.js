@@ -112,3 +112,5 @@ function clearDatabase(idbDatabase) {
     }
   });
 }
+
+//
