@@ -16,7 +16,6 @@ request.onsuccess = (event) => {
 
   const getRequest = store.getAll();
   getRequest.onsuccess = (e) => {
-    console.log("onsuccess");
     const images = getRequest.result;
     const select = document.getElementById("versions");
     select.options[select.options.length] = new Option("Не выбрано", -1);
@@ -63,11 +62,6 @@ function onphotoInputChange(event) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  // const db = request.result; // получаем бд
-  // console.log(db);
-});
-
 function addButton(inx, name, offsetLeft, offsetTop, isOn = false) {
   const edit = document.createElement("div");
   edit.style.position = "absolute";
@@ -104,6 +98,8 @@ function addButton(inx, name, offsetLeft, offsetTop, isOn = false) {
   let but = document.createElement("input");
   but.style.color = "white";
   but.style.cursor = "pointer";
+  but.style.borderRadius = "5px";
+  but.style.border = "1px solid #999";
   but.type = "button";
   but.value = name ?? "КНОПКА № " + inx;
   but.setAttribute("on", isOn);
@@ -225,6 +221,7 @@ function onVersionChange() {
     localStorage.setItem("version", selectedId);
 
     if (selectedVersion) {
+      imageData = selectedVersion?.img;
       document.getElementById("preview").src = selectedVersion?.img || "";
       (selectedVersion.buttons || []).forEach((b) => {
         addButton(b.id, b.name, b.offsetLeft, b.offsetTop, b.isOn);
@@ -247,10 +244,8 @@ document.getElementById("export").onclick = async () => {
   if (filename) {
     exportToJson(request.result)
       .then((result) => {
-        console.log(12);
         const blob = new Blob([result], { type: "text/csv" });
         if (window.navigator.msSaveOrOpenBlob) {
-          console.log("Exported JSON string:", result);
           window.navigator.msSaveBlob(blob, filename);
         } else {
           const elem = window.document.createElement("a");
@@ -272,13 +267,11 @@ document.getElementById("import").addEventListener("change", () => {
   fr.readAsText(document.getElementById("import").files[0]);
   fr.addEventListener("load", function () {
     const data = fr.result;
-    console.log(data);
     importFromJson(request.result, data)
       .then((result) => {
-        console.log("Exported JSON string:", result);
         setTimeout(() => {
           location.reload();
-        }, 500);
+        }, 3500);
       })
       .catch((error) => {
         console.error("Something went wrong during export:", error);
