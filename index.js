@@ -92,7 +92,6 @@ function addButton(inx, name, offsetLeft, offsetTop, isOn = false) {
   butWrap.id = inx;
   butWrap.classList.add("butWrap");
   butWrap.style.position = "absolute";
-  butWrap.style.position = "absolute";
   butWrap.style.zIndex = 1000;
 
   let but = document.createElement("input");
@@ -171,6 +170,12 @@ function addButton(inx, name, offsetLeft, offsetTop, isOn = false) {
 }
 
 document.getElementById("addButton").addEventListener("click", () => {
+  const btnList = document.getElementsByClassName("butWrap");
+  const ids = [];
+  for (let index = 0; index < btnList.length; index++) {
+    ids.push(+btnList[index].id);
+  }
+  i = Math.max(...ids);
   addButton(++i);
 });
 
