@@ -24,9 +24,14 @@ body {
 }
 
 .interface {
-    position: sticky;
+    position: fixed;
+    z-index: 9999;
     top: 0;
     left: 0;
+    background-color: #f2f2f2;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #999;
 }
 
 .canvas {
