@@ -111,6 +111,12 @@ function addButton(inx, name, offsetLeft, offsetTop, isOn = false) {
   butWrap.appendChild(but);
 
   document.body.append(butWrap);
+  let box = document.body.getBoundingClientRect();
+  let centerX = document.documentElement.clientWidth / 2;
+  let centerY = document.documentElement.clientHeight / 2;
+  butWrap.style.left = Math.abs(box.x) + centerX + "px";
+  butWrap.style.top = Math.abs(box.y) + centerY + "px";
+
   if (offsetLeft) {
     butWrap.style.left = offsetLeft + "px";
   }
@@ -175,7 +181,7 @@ document.getElementById("addButton").addEventListener("click", () => {
   for (let index = 0; index < btnList.length; index++) {
     ids.push(+btnList[index].id);
   }
-  i = Math.max(...ids);
+  i = ids.length ? Math.max(...ids) : 0;
   addButton(++i);
 });
 
